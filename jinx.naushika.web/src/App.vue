@@ -9,6 +9,8 @@ export default {
     let contents = this.$store.state.contents;
     if (contents == null) {
       this.getContents();
+    } else {
+      this.$router.replace("/home");
     }
   },
   methods: {
@@ -19,6 +21,7 @@ export default {
         .then(function(response) {
           if (response && response.data.code === 0) {
             that.$store.commit("changeContents", response.data.data);
+            that.$router.replace("/home");
           }
         })
         .catch(function(err) {
