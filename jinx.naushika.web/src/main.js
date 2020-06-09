@@ -20,6 +20,7 @@ Vue.use(Vant);
 window.$ServiceRootPath = "http://118.24.64.59:8001";
 // window.$ServiceRootPath = "http://localhost:8001";
 window.$ContentRootPath = "http://118.24.64.59:8002";
+Vue.prototype.$ContentRootPath = window.$ContentRootPath;
 
 new Vue({
   router,
