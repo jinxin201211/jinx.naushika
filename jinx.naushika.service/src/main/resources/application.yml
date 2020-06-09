@@ -1,0 +1,11 @@
+spring:
+  http:
+    encoding:
+      force: true
+      charset: UTF-8
+  profiles:
+    active: test
+  application:
+    name: jinx.naushika.service
+server:
+  port: 8001
