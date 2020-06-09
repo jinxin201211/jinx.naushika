@@ -1,6 +1,6 @@
 <template>
   <div>
-    <a @click="handleClear">Clear</a>
+    <van-button type="primary" @click="handleClear">Clear</van-button>
   </div>
 </template>
 <script>
@@ -12,7 +12,7 @@ export default {
   methods: {
     handleClear: function() {
       this.$store.commit("clearContents");
-      console.log("已清空");
+      this.$toast("已清空");
     }
   }
 };
