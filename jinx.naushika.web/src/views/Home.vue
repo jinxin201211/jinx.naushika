@@ -55,8 +55,8 @@ export default {
     // this.$store.commit("changePage", 0);
     // this.handleClear();
     // this.Section = 0;
-    this.Page = this.Contents.Children[this.Section].Children.length - 1;
-    this.$store.commit("changePage", this.Page);
+    // this.Page = this.Contents.Children[this.Section].Children.length - 1;
+    // this.$store.commit("changePage", this.Page);
   },
   methods: {
     handleClear: function() {
