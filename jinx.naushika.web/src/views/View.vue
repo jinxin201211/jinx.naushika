@@ -21,8 +21,8 @@ export default {
   data() {
     return {
       Contents: this.$store.state.contents,
-      Section: this.$route.query.section,
-      Page: this.$route.query.page
+      Section: this.$store.state.section,
+      Page: this.$store.state.page
     };
   },
   computed: {

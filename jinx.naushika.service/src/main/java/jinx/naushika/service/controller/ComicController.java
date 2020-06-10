@@ -11,8 +11,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/comic")
@@ -38,20 +42,22 @@ public class ComicController {
             model.Name = base_dir.getName();
 
             if (null != base_dir.listFiles()) {
-                File[] children_dir = base_dir.listFiles();
-                DirectoryModel[] children_model = new DirectoryModel[children_dir.length];
-                for (int i = 0; i < children_dir.length; i++) {
+                List<File> children_dir = Arrays.stream(base_dir.listFiles()).filter(p -> p.isDirectory()).collect(Collectors.toList());
+                DirectoryModel[] children_model = new DirectoryModel[children_dir.size()];
+                for (int i = 0; i < children_dir.size(); i++) {
                     children_model[i] = new DirectoryModel();
-                    children_model[i].Name = children_dir[i].getName();
+                    children_model[i].Name = children_dir.get(i).getName();
                     children_model[i].Seq = i;
 
-                    if (null != children_dir[i].listFiles()) {
-                        File[] files_dir = children_dir[i].listFiles();
-                        DirectoryModel[] file_model = new DirectoryModel[files_dir.length];
-                        for (int j = 0; j < files_dir.length; j++) {
-                            file_model[j] = new DirectoryModel();
-                            file_model[j].Name = files_dir[j].getName();
-                            file_model[j].Seq = j;
+                    if (null != children_dir.get(i).listFiles()) {
+                        List<File> files_dir = Arrays.stream(children_dir.get(i).listFiles()).filter(p -> p.isFile()).collect(Collectors.toList());
+                        DirectoryModel[] file_model = new DirectoryModel[files_dir.size()];
+                        for (int j = 0; j < files_dir.size(); j++) {
+                            if (files_dir.get(j).isFile()) {
+                                file_model[j] = new DirectoryModel();
+                                file_model[j].Name = files_dir.get(j).getName();
+                                file_model[j].Seq = j;
+                            }
                         }
                         children_model[i].Children = file_model;
                     }
