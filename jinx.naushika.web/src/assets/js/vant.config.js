@@ -1,4 +1,4 @@
-import { Button, Toast, Image, Loading, Popup } from "vant";
+import { Button, Toast, Image, Loading, Popup, Slider } from "vant";
 
 export default {
   install(V) {
@@ -6,7 +6,8 @@ export default {
       .use(Toast)
       .use(Image)
       .use(Loading)
-      .use(Popup);
+      .use(Popup)
+      .use(Slider);
     V.prototype.$toast = Toast;
   }
 };

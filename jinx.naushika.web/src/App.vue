@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div style="width: 100%; height: 100%;">
     <router-view />
   </div>
 </template>
@@ -36,3 +36,14 @@ export default {
   }
 };
 </script>
+
+<style>
+html,
+body {
+  width: 100%;
+  height: 100%;
+}
+* {
+  box-sizing: border-box;
+}
+</style>
