@@ -1,7 +1,7 @@
 <template>
   <div style="padding: 30px 20px; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; background: #000000; color: #ffffff;" @click="handleBodyClick($event)">
-    <div style="width: 100%; height: 80%;" @touchstart="handleTouchStart($event)" @touchmove="handleTouchMove($event)" @touchend="handleTouchEnd($event)">
-      <van-image :src="Image" :class="{ zoomout: image_zoom_out }">
+    <div style="width: 100%;" @touchstart="handleTouchStart($event)" @touchend="handleTouchEnd($event)">
+      <van-image :src="Image">
         <template v-slot:loading>
           <van-loading type="spinner" size="20" />
         </template>
@@ -58,7 +58,19 @@ export default {
       show_content: false,
       show_tools: false,
       click_event: false,
-      image_zoom_out: false
+      image_zoom_out: false,
+      touch_event: {
+        start: {
+          x: 0,
+          y: 0,
+          timestamp: 0
+        },
+        end: {
+          x: 0,
+          y: 0,
+          timestamp: 0
+        }
+      }
     };
   },
   computed: {
@@ -150,13 +162,27 @@ export default {
       }
     },
     handleTouchStart(event) {
-      console.log(event);
-    },
-    handleTouchMove(event) {
       // console.log(event);
+      this.touch_event.start.x = event.changedTouches[0].pageX;
+      this.touch_event.start.y = event.changedTouches[0].pageY;
+      this.touch_event.start.timestamp = event.timeStamp;
     },
     handleTouchEnd(event) {
-      console.log(event);
+      // console.log(event);
+      this.touch_event.end.x = event.changedTouches[0].pageX;
+      this.touch_event.end.y = event.changedTouches[0].pageY;
+      this.touch_event.end.timestamp = event.timeStamp;
+      console.log(this.touch_event);
+      const slope = this.touch_event.end.x != this.touch_event.start.x ? Math.abs((this.touch_event.end.y - this.touch_event.start.y) / (this.touch_event.end.x - this.touch_event.start.x)) : 0; //角度小于30°
+      console.log(`(${this.touch_event.end.x}, ${this.touch_event.end.y}),(${this.touch_event.start.x}, ${this.touch_event.start.y})`);
+      console.log(slope);
+      if (this.touch_event.start.x != this.touch_event.end.x && this.touch_event.start.y != this.touch_event.end.y && this.touch_event.end.timestamp - this.touch_event.start.timestamp < 300 && slope < 0.5) {
+        if (this.touch_event.start.x > this.touch_event.end.x) {
+          this.handleNextPage();
+        } else {
+          this.handlePrevPage();
+        }
+      }
     },
     handleCenterClick() {
       this.show_tools = !this.show_tools;
@@ -243,14 +269,5 @@ export default {
   background-color: #f1f1f1;
   border-radius: 100px;
   border: 1px solid #000000;
-}
-.van-image {
-  height: 100%;
-  width: 100%;
-  overflow: scroll;
-}
-.van-image.zoomout > img {
-  height: 200%;
-  width: 200%;
 }
 </style>
