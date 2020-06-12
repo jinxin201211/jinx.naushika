@@ -1,5 +1,5 @@
 <template>
-  <div style="padding: 30px 20px; width: 100%; height: 100%; position: relative; background: #000000; color: #ffffff;" v-tap="handleBodyTap">
+  <div style="padding: 30px 20px; width: 100%; height: 100%; position: relative; background: #ffffff; color: #000000;" v-tap="handleBodyTap">
     <div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: scroll;" v-swipeleft="handleSwipeLeft" v-swiperight="handleSwipeRight">
       <van-image :src="Image" :class="{ zoomout: image_zoom_out }">
         <template v-slot:loading>
@@ -13,28 +13,28 @@
       <span v-text="PageName"></span>
       <span v-text="Summary.Current + '/' + Summary.Sum" style="float: right;"></span>
     </div>
-    <div class="jinx-tools-panel" :class="{ show: show_tools }">
+    <div class="jinx-tools-panel" :class="{ show: show_tools }" v-tap.stop="handleNone">
       <div style="width: 100%; box-sizing: border-box; position: relative; padding: 0 55px; height: 30px; padding-top: 15px; font-size: 12px;">
-        <span @click.prevent.stop="handlePrevSection" style="position: absolute; top: 0; left: 0; line-height: 30px;">上一卷</span>
-        <van-slider v-model="Page.Current" :max="Page.Max" :min="Page.Min" active-color="#666666" inactive-color="#666666" bar-height="2">
+        <span v-tap="handlePrevSection" style="position: absolute; top: 0; left: 0; line-height: 30px;">上一卷</span>
+        <van-slider v-model="Page.Current" :max="Page.Max" :min="Page.Min" active-color="#e1e1e1" inactive-color="#e1e1e1" bar-height="2">
           <template #button>
             <div class="jinx-slider-button">
               {{ Page.Current }}
             </div>
           </template>
         </van-slider>
-        <span @click.prevent.stop="handleNextSection" style="position: absolute; top: 0; right: 0; line-height: 30px;">下一卷</span>
+        <span v-tap="handleNextSection" style="position: absolute; top: 0; right: 0; line-height: 30px;">下一卷</span>
       </div>
       <div style="margin-top: 20px;">
-        <span @click.prevent.stop="handleViewContent">查看目录</span>
-        <span @click.prevent.stop="handleClear" style="margin-left: 20px;">清空目录</span>
+        <span v-tap="handleViewContent">查看目录</span>
+        <span v-tap="handleClear" style="margin-left: 20px;">清空目录</span>
       </div>
     </div>
-    <van-popup v-model="show_content" position="left" :style="{ height: '100%', width: '80%' }" @click.prevent.stop="">
+    <van-popup v-model="show_content" position="left" :style="{ height: '100%', width: '80%' }" v-tap.stop="handleNone">
       <div style="color: #000000; font-size: 14px;">
         <div style="height: 50px; line-height: 50px; background: #f1f1f1; text-align: center;">目录</div>
         <div style="padding: 10px;">
-          <div style="height: 50px; line-height: 50px; border-bottom: 1px solid #999999;" @click.prevent.stop="handleContentClick(index)" v-for="(item, index) in Contents.Children" :key="'content_' + index"><span v-text="item.Name"></span></div>
+          <div style="height: 50px; line-height: 50px; border-bottom: 1px solid #999999;" @click="handleContentClick(index)" v-for="(item, index) in Contents.Children" :key="'content_' + index"><span v-text="item.Name"></span></div>
         </div>
       </div>
     </van-popup>
@@ -109,6 +109,7 @@ export default {
     this.Page.Current = this.$store.state.page;
   },
   methods: {
+    handleNone() {},
     handleClear: function() {
       this.$store.commit("clearContents");
       this.$store.commit("clearSection");
@@ -129,11 +130,15 @@ export default {
       }
     },
     handleSwipeLeft() {
-      console.log("handleSwipeLeft");
+      if (this.image_zoom_out) {
+        return;
+      }
       this.handlePrevPage();
     },
     handleSwipeRight() {
-      console.log("handleSwipeRight");
+      if (this.image_zoom_out) {
+        return;
+      }
       this.handleNextPage();
     },
     handleSingleClick(event) {
@@ -158,13 +163,9 @@ export default {
       }
     },
     handleDoubleClick() {
-      console.log("handleDoubleClick");
       this.image_zoom_out = !this.image_zoom_out;
     },
     handleCenterClick() {
-      if (this.image_zoom_out) {
-        return;
-      }
       this.show_tools = !this.show_tools;
     },
     handleContentClick(index) {
@@ -176,9 +177,6 @@ export default {
       this.image_zoom_out = false;
     },
     handlePrevPage() {
-      if (this.image_zoom_out) {
-        return;
-      }
       if (this.Page.Current === 0 && this.Section.Current === 0) {
         return;
       }
@@ -193,9 +191,6 @@ export default {
       this.image_zoom_out = false;
     },
     handleNextPage() {
-      if (this.image_zoom_out) {
-        return;
-      }
       if (this.Page.Current === this.Page.Max && this.Section.Current === this.Section.Max) {
         return;
       }
@@ -210,9 +205,6 @@ export default {
       this.image_zoom_out = false;
     },
     handlePrevSection() {
-      if (this.image_zoom_out) {
-        return;
-      }
       if (this.Section.Current === 0) {
         return;
       }
@@ -224,9 +216,6 @@ export default {
       this.image_zoom_out = false;
     },
     handleNextSection() {
-      if (this.image_zoom_out) {
-        return;
-      }
       if (this.Section.Current === this.Section.Max) {
         return;
       }
@@ -238,23 +227,22 @@ export default {
       this.image_zoom_out = false;
     },
     handleViewContent() {
-      if (this.image_zoom_out) {
-        return;
-      }
-      this.show_content = true;
+      setTimeout(() => {
+        this.show_content = true;
+      }, 100);
     }
   }
 };
 </script>
 <style lang="less">
 .jinx-tools-panel {
-  padding: 15px;
+  padding: 25px 15px;
   position: fixed;
   bottom: -100%;
   left: 0;
   width: 100%;
-  background: rgba(255, 255, 255, 1);
-  color: #000000;
+  background: rgba(0, 0, 0, 0.8);
+  color: #e1e1e1;
   transition: bottom 0.3s;
 }
 .jinx-tools-panel.show {
