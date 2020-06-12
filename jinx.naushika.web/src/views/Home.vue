@@ -1,7 +1,7 @@
 <template>
-  <div style="padding: 30px 20px; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; position: relative; background: #000000; color: #ffffff;" @click="handleBodyClick($event)">
-    <div style="width: 100%;" @touchstart="handleTouchStart($event)" @touchend="handleTouchEnd($event)">
-      <van-image :src="Image">
+  <div style="padding: 30px 20px; width: 100%; height: 100%; position: relative; background: #000000; color: #ffffff;" v-tap="handleBodyTap">
+    <div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: scroll;" v-swipeleft="handleSwipeLeft" v-swiperight="handleSwipeRight">
+      <van-image :src="Image" :class="{ zoomout: image_zoom_out }">
         <template v-slot:loading>
           <van-loading type="spinner" size="20" />
         </template>
@@ -41,6 +41,8 @@
   </div>
 </template>
 <script>
+import "@/assets/js/vue-touch.js";
+
 export default {
   data() {
     return {
@@ -100,22 +102,11 @@ export default {
     }
   },
   created() {
-    // this.$store.commit("changeSection", 0);
-    // this.$store.commit("changePage", 0);
     this.Contents = this.$store.state.contents;
     this.Section.Max = this.Contents.Children.length - 1;
     this.Section.Current = this.$store.state.section;
     this.Page.Max = this.Contents.Children[this.Section.Current].Children.length - 1;
     this.Page.Current = this.$store.state.page;
-    // console.log("mounted");
-    // console.log(this.$store.state.contents);
-    // console.log(this.Contents);
-    // console.log(this.Section);
-    // console.log(this.Page);
-    // this.handleClear();
-    // this.Section = 0;
-    // this.Page = this.Contents.Children[this.Section].Children.length - 1;
-    // this.$store.commit("changePage", this.Page);
   },
   methods: {
     handleClear: function() {
@@ -124,12 +115,12 @@ export default {
       this.$store.commit("clearPage");
       this.$toast("已清空");
     },
-    handleBodyClick(event) {
+    handleBodyTap(event) {
       const that = this;
-      // 开启延时器，300ms的间隔区分单击和双击，解决双击时执行单击事件
       if (that.click_event) {
         clearTimeout(that.click_event);
         that.click_event = false;
+        that.handleDoubleClick();
       } else {
         that.click_event = setTimeout(() => {
           that.click_event = false;
@@ -137,13 +128,20 @@ export default {
         }, 300);
       }
     },
+    handleSwipeLeft() {
+      console.log("handleSwipeLeft");
+      this.handlePrevPage();
+    },
+    handleSwipeRight() {
+      console.log("handleSwipeRight");
+      this.handleNextPage();
+    },
     handleSingleClick(event) {
-      // console.log(event);
-      if (event.toElement.className.indexOf("van-overlay") != -1) {
+      if (event.target.className.indexOf("van-overlay") != -1) {
         return;
       }
-      const top = event.clientY;
-      const left = event.clientX;
+      const top = event.changedTouches[0].clientY;
+      const left = event.changedTouches[0].clientX;
       const clientHeight = document.body.clientHeight || document.documentElement.clientHeight;
       const clientWidth = document.body.clientWidth || document.documentElement.clientWidth;
       //判断是否在中心区域
@@ -152,39 +150,21 @@ export default {
       }
       //判断是否在右边
       else if (left > clientWidth / 2) {
-        // console.log("handleNextPage");
         this.handleNextPage();
       }
       //在左边
       else {
-        // console.log("handlePrevPage");
         this.handlePrevPage();
       }
     },
-    handleTouchStart(event) {
-      // console.log(event);
-      this.touch_event.start.x = event.changedTouches[0].pageX;
-      this.touch_event.start.y = event.changedTouches[0].pageY;
-      this.touch_event.start.timestamp = event.timeStamp;
-    },
-    handleTouchEnd(event) {
-      // console.log(event);
-      this.touch_event.end.x = event.changedTouches[0].pageX;
-      this.touch_event.end.y = event.changedTouches[0].pageY;
-      this.touch_event.end.timestamp = event.timeStamp;
-      console.log(this.touch_event);
-      const slope = this.touch_event.end.x != this.touch_event.start.x ? Math.abs((this.touch_event.end.y - this.touch_event.start.y) / (this.touch_event.end.x - this.touch_event.start.x)) : 0; //角度小于30°
-      console.log(`(${this.touch_event.end.x}, ${this.touch_event.end.y}),(${this.touch_event.start.x}, ${this.touch_event.start.y})`);
-      console.log(slope);
-      if (this.touch_event.start.x != this.touch_event.end.x && this.touch_event.start.y != this.touch_event.end.y && this.touch_event.end.timestamp - this.touch_event.start.timestamp < 300 && slope < 0.5) {
-        if (this.touch_event.start.x > this.touch_event.end.x) {
-          this.handleNextPage();
-        } else {
-          this.handlePrevPage();
-        }
-      }
+    handleDoubleClick() {
+      console.log("handleDoubleClick");
+      this.image_zoom_out = !this.image_zoom_out;
     },
     handleCenterClick() {
+      if (this.image_zoom_out) {
+        return;
+      }
       this.show_tools = !this.show_tools;
     },
     handleContentClick(index) {
@@ -193,8 +173,12 @@ export default {
       this.$store.commit("changeSection", index);
       this.$store.commit("changePage", 0);
       this.show_content = false;
+      this.image_zoom_out = false;
     },
     handlePrevPage() {
+      if (this.image_zoom_out) {
+        return;
+      }
       if (this.Page.Current === 0 && this.Section.Current === 0) {
         return;
       }
@@ -206,8 +190,12 @@ export default {
       }
       this.$store.commit("changeSection", this.Section.Current);
       this.$store.commit("changePage", this.Page.Current);
+      this.image_zoom_out = false;
     },
     handleNextPage() {
+      if (this.image_zoom_out) {
+        return;
+      }
       if (this.Page.Current === this.Page.Max && this.Section.Current === this.Section.Max) {
         return;
       }
@@ -219,8 +207,12 @@ export default {
       }
       this.$store.commit("changeSection", this.Section.Current);
       this.$store.commit("changePage", this.Page.Current);
+      this.image_zoom_out = false;
     },
     handlePrevSection() {
+      if (this.image_zoom_out) {
+        return;
+      }
       if (this.Section.Current === 0) {
         return;
       }
@@ -229,8 +221,12 @@ export default {
       this.Page.Max = this.Contents.Children[this.Section.Current].Children.length - 1;
       this.$store.commit("changeSection", this.Section.Current);
       this.$store.commit("changePage", this.Page.Current);
+      this.image_zoom_out = false;
     },
     handleNextSection() {
+      if (this.image_zoom_out) {
+        return;
+      }
       if (this.Section.Current === this.Section.Max) {
         return;
       }
@@ -239,8 +235,12 @@ export default {
       this.Page.Max = this.Contents.Children[this.Section.Current].Children.length - 1;
       this.$store.commit("changeSection", this.Section.Current);
       this.$store.commit("changePage", this.Page.Current);
+      this.image_zoom_out = false;
     },
     handleViewContent() {
+      if (this.image_zoom_out) {
+        return;
+      }
       this.show_content = true;
     }
   }
@@ -269,5 +269,14 @@ export default {
   background-color: #f1f1f1;
   border-radius: 100px;
   border: 1px solid #000000;
+}
+
+.zoomout {
+  max-height: 100%;
+}
+
+.zoomout > img {
+  width: 150%;
+  // width: 150%;
 }
 </style>
