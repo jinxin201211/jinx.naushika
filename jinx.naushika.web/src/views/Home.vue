@@ -1,5 +1,5 @@
 <template>
-  <div style="padding: 30px 20px; width: 100%; height: 100%; position: relative; background: #ffffff; color: #000000;" v-tap="handleBodyTap">
+  <div style="padding: 30px 0; width: 100%; height: 100%; position: relative; background: #ffffff; color: #000000;" v-tap="handleBodyTap">
     <div style="width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; overflow: scroll;" v-swipeleft="handleSwipeLeft" v-swiperight="handleSwipeRight">
       <van-image :src="Image" :class="{ zoomout: image_zoom_out }">
         <template v-slot:loading>
